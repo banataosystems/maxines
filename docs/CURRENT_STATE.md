@@ -32,6 +32,8 @@ Observed 2026-08-10 (Asia/Manila). This file records provider evidence because P
 - Telegram bot commands, menu button, secret-token webhook, pre-checkout handler and successful-payment finalization path.
 - Provider secrets remain in Supabase Vault / Edge service context; no bot token, payment token, webhook secret or Supabase service key is committed to GitHub or returned to browsers.
 - Commerce activation settings are fail-closed.
+- Read-only Vercel→Edge GET proxy calls have one retry for transient 502/503/504 responses; session/checkout POSTs never auto-retry.
+- Original v4 Content Security Policy and SPA rewrites are restored in production.
 
 ### Tested / provider-verified
 
@@ -45,15 +47,18 @@ Observed 2026-08-10 (Asia/Manila). This file records provider evidence because P
 - Vercel reported no runtime error clusters during the verification window.
 - Live `/api/catalog` returns 13 database-backed products and exposes only `inStock` booleans, not exact stock counts.
 - Live `/api/health` reports the full backend is fail-closed.
+- A single transient `/api/health` 503 was observed during final verification; the immediate retry returned 200 with unchanged state. Read-only retry hardening was then deployed. No write endpoint was retried.
+- Live HTML response includes CSP, nosniff, strict referrer policy, restrictive permissions policy and SAMEORIGIN framing policy.
+- A repository verification workflow and release-contract tests are configured. The current connector does not expose push-triggered Actions runs, so workflow success is not counted as proof here.
 
 ### Deployed
 
-- Runtime implementation commit: `0b44e627f0a2fb2f2e2d2061307997da76077ff2` (`feat: wire MAXINES gated Telegram checkout UX`).
-- Matching production deployment: `dpl_6wEAP4UgBZxXPkCdTh8oV7dmok9F`, READY, alias includes `maxines.vercel.app`.
-- Subsequent Git commits only preserve provider migrations/rollback/evidence unless a later state record says otherwise.
+- Current runtime implementation commit: `f0eab10eda8a1bda6b96a18395fa6a2baf94a34b` (`reliability: retry read-only MAXINES backend requests once`).
+- Matching production deployment: `dpl_4GRWdWeHKnqqddh7C44Cmasbzkh4`, READY, alias includes `maxines.vercel.app`.
 - Supabase Edge Function `maxines-api`: version 3, ACTIVE, provider SHA-256 `e7da3146abaa9aa7bbfa00dfcc8d83014fd4d7092b6186eeefdf39456e3e4a63`.
 - Supabase Edge Function `maxines-telegram-webhook`: version 2, ACTIVE, provider SHA-256 `abffb2aed1c97d12952f6b62a7e77359a84ad1d1b34ec36c4371cbb044488973`.
 - One-time `maxines-telegram-bootstrap`: version 4 is inert after successful configuration, provider SHA-256 `e94a7918adb84bb288c71581d5c1fa749728a210b46e79fd1f33186ba3edc38c`.
+- Commits after the runtime implementation are evidence/documentation-only unless a later state record says otherwise.
 
 ### Production-verified
 
@@ -61,7 +66,7 @@ Verified now:
 
 - `https://maxines.vercel.app` responds successfully.
 - Same-origin database-backed catalog and health APIs respond successfully.
-- Vercel deployment provenance is bound to the exact Git commit.
+- Vercel deployment provenance is bound to the exact runtime Git commit.
 - Telegram bot identity and bot configuration are provider-verified.
 - Production gate is closed: `paymentProviderConfigured=false`, `releaseAuthorized=false`, `paymentCurrencyConfigured=false`, `shippingConfigured=false`, `inventoryConfigured=false`, `checkoutActivated=false`.
 
@@ -94,12 +99,12 @@ Temporary synchronous/async database HTTP bootstrap transports were removed afte
 ## Rollback
 
 - Fast commerce kill switch: `supabase/rollback/disable_checkout.sql` only sets `checkout_release_authorized=false`; it does not destroy products, stock, orders, payments or evidence.
-- Previous Vercel production rollback candidate before the checkout-UX change: `dpl_FyCQZDSzbxhpPLTAYPiCCpMxFmEK` at Git commit `52c5a8c7b563c75b7cf5d13075d1adca26d8ebbc`.
+- Immediate Vercel runtime rollback candidate before read-retry hardening: `dpl_2YMSzY6GnfZ9YvZ8SCN27G5q1nkq` at Git commit `2d5b7e2e6471c3d28c8a934d39e1a50ed4932218`; it already contains the restored CSP.
 - Exact original v4 ZIP remains the content-addressed recovery authority.
 
 ## Current phase
 
-**Production storefront + database + Telegram control plane deployed; commerce activation fail-closed.**
+**Production storefront + database + Telegram control plane deployed; full commerce backend implemented but activation remains fail-closed.**
 
 ## Current blockers / owner or external inputs
 
