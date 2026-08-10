@@ -5,12 +5,21 @@ import { join } from 'node:path';
 
 const read=p=>readFileSync(p,'utf8');
 const stripSqlComments=sql=>sql.replace(/--.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');
+const VERIFIED_MEDIA_SKUS=['SHRT-89','OUT-014','GRF-101','BSC-06','OUT-012','PRT-003','PRT-002'];
 
-test('production entry loads database/session bootstrap and Archive editorial media',()=>{
+test('production entry loads database/session bootstrap and only verified Archive editorial media',()=>{
   const html=read('index.html');
   assert.match(html,/\/backend-init\.js/);
   assert.match(html,/telegram-web-app\.js/);
-  for(const file of ['bsc-06.js','shrt-89.js','out-014.js','grf-101.js'])assert.match(html,new RegExp(`/media/editorial/${file.replace('.','\\.')}`));
+  assert.match(html,/\/media\/originals\.js/);
+  for(const file of ['bsc-06.js','shrt-89.js','out-014.js','grf-101.js','out-012.js','prt-003.js','prt-002.js'])assert.match(html,new RegExp(`/media/editorial/${file.replace('.','\\.')}`));
+  assert.doesNotMatch(html,/\/media\/editorial\/grf-102\.js/);
+});
+
+test('verified untouched-photo derivative layer reconciles exactly to approved media mappings',()=>{
+  const originals=read('media/originals.js');
+  for(const sku of VERIFIED_MEDIA_SKUS)assert.match(originals,new RegExp(`__ARCHIVE_ORIGINAL__\\['${sku}'\\]`));
+  assert.doesNotMatch(originals,/GRF-102/);
 });
 
 test('embedded recovery catalog contains exactly 13 source SKU records',()=>{
@@ -22,6 +31,8 @@ test('embedded recovery catalog contains exactly 13 source SKU records',()=>{
 test('Archive shell keeps editorial and untouched original media as separate trust layers',()=>{
   const shell=read('shell.js');
   assert.match(shell,/__ARCHIVE_EDITORIAL__/);
+  assert.match(shell,/__ARCHIVE_ORIGINAL__/);
+  assert.match(shell,/O\[p\.sku\]\|\|p\.imageUrl/);
   assert.match(shell,/Editorial/);
   assert.match(shell,/Original Photo/);
   assert.match(shell,/source display label/i);
