@@ -1,0 +1,1 @@
+Temporary capability check for the authenticity repair branch.
