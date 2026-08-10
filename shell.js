@@ -1,10 +1,10 @@
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
-const tg=window.Telegram?.WebApp;const P=window.__MAXINES_PRODUCTS__||[];const H=window.__MAXINES_HEALTH__||{};const S=window.__MAXINES_SESSION__||{};const E=window.__ARCHIVE_EDITORIAL__||{};
+const tg=window.Telegram?.WebApp;const P=window.__MAXINES_PRODUCTS__||[];const H=window.__MAXINES_HEALTH__||{};const S=window.__MAXINES_SESSION__||{};const E=window.__ARCHIVE_EDITORIAL__||{};const O=window.__ARCHIVE_ORIGINAL__||{};
 const CURATED=['SHRT-89','OUT-014','GRF-101','BSC-06','OUT-012','PRT-003','PRT-002','GRF-102'];
 let entered=sessionStorage.getItem('archive_entered')==='1',open=null,showBag=false,mediaMode='editorial',searchOpen=false,q='',toast='',requestState=null;
 let bag=(()=>{try{return JSON.parse(localStorage.getItem('maxines_cart_v1')||'[]')}catch{return[]}})();
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const product=sku=>P.find(p=>p.sku===sku);const editorial=p=>E[p.sku]||p.imageUrl;const original=p=>p.imageUrl||E[p.sku]||'';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const product=sku=>P.find(p=>p.sku===sku);const editorial=p=>E[p.sku]||p.imageUrl;const original=p=>O[p.sku]||p.imageUrl||'';
 const sourceLabel=p=>`${Number(p.displayPrice)%1?Number(p.displayPrice).toFixed(2):Number(p.displayPrice)} ${p.displayCurrency}`;
 const safeDescriptor=p=>({
  'SHRT-89':'Statement print · contrast collar.',
