@@ -31,6 +31,19 @@ test('bootstrap hydrates live catalog, health and Telegram session',()=>{
   assert.match(init,/fetch\('\/api\/health'/);
   assert.match(init,/fetch\('\/api\/session'/);
   assert.match(init,/x-telegram-init-data/);
+  assert.match(init,/request-mode\.js/);
+});
+
+test('locked checkout has a non-charging authenticated availability fallback',()=>{
+  const mode=read('request-mode.js');
+  assert.match(mode,/H\.checkoutActivated/);
+  assert.match(mode,/S\.authenticated/);
+  assert.match(mode,/fetch\('\/api\/request'/);
+  assert.match(mode,/not a confirmed order/i);
+  assert.match(mode,/no payment/i);
+  const migration=read('supabase/migrations/20260810153952_availability_request_fallback.sql');
+  assert.match(migration,/revoke all on table public\.availability_requests from anon, authenticated/i);
+  assert.match(migration,/grant execute on function public\.create_availability_request[\s\S]*to service_role/i);
 });
 
 test('rollback is non-destructive and closes release gate',()=>{
