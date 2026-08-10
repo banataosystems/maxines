@@ -46,11 +46,15 @@ Supabase Edge function `maxines-request` version 1 is ACTIVE with provider SHA-2
 
 ## Production evidence
 
-Current production candidate before this documentation-only verification PR:
+Verified runtime code candidate:
 
-- Git commit: `cc4d16a52d7a4f68a1848d3163268287b45fdc4a`.
-- Vercel deployment: `dpl_BvqGqDCUyEMy5NULnzZyVQ3swYYL`.
-- Vercel state: READY, production alias includes `maxines.vercel.app`.
+- Git runtime/test commit: `cc4d16a52d7a4f68a1848d3163268287b45fdc4a`.
+- Matching production deployment: `dpl_BvqGqDCUyEMy5NULnzZyVQ3swYYL`, READY.
+- Verification PR #1 used that exact production base plus this documentation-only state record.
+- PR verification head: `9a5acc6758f816811c8b90b9835c4822d793c6b5`.
+- GitHub Actions `Verify MAXINES` run `31405579570`: **completed / success**; `npm run verify` passed.
+- PR #1 was squash-merged to `main` as `0376ddc3cfaaf012ae83f93da48a86b83dc4e9a7`.
+- Matching merged production deployment: `dpl_3pFkXNGnEtMVwAfJAPoVicXdyCEH`, READY; GitHub commit verification reported `verified`.
 - `/api/health`: HTTP 200.
 - Health state: database connected; 13 products; Telegram configured; webhook secret configured; paid checkout disabled.
 - Paid-commerce gates: payment provider false; release authorization false; settlement currency unset; shipping unset; verified inventory false; `checkoutActivated=false`.
@@ -59,12 +63,13 @@ Current production candidate before this documentation-only verification PR:
 - Direct availability table SELECT for `anon` and `authenticated`: false.
 - Availability creation RPC execute for `anon`/`authenticated`: false; for `service_role`: true.
 - Supabase security advisor: no WARN/ERROR findings; remaining RLS-without-policy entries are intentional INFO deny-by-default boundaries.
+- Vercel runtime error check over the final verification window: no runtime error clusters.
 
-## CI repair
+## CI repair and proof
 
 GitHub Actions verification had been red because a rollback safety test matched the word `delete` inside a harmless SQL comment (`does not delete ...`). The test was corrected to strip SQL comments before scanning executable statements for `DELETE`, `DROP` or `TRUNCATE`.
 
-A pull-request verification run from the exact production code plus this documentation-only change is required before this candidate is called CI-verified and merged.
+The independent pull-request run then passed every workflow step, including `npm run verify`, before merge. CI is therefore green for the verified production code candidate.
 
 ## Applied Supabase migrations
 
@@ -82,7 +87,7 @@ A pull-request verification run from the exact production code plus this documen
 
 ## Current phase
 
-**Production storefront, database, Telegram control plane, full gated commerce backend and non-charging authenticated availability-request workflow are deployed. Paid commerce remains intentionally fail-closed until genuine merchant inputs exist.**
+**Production storefront, database, Telegram control plane, full gated commerce backend, CI verification and non-charging authenticated availability-request workflow are deployed and verified. Paid commerce remains intentionally fail-closed until genuine merchant inputs exist.**
 
 ## Genuine external inputs still absent
 
