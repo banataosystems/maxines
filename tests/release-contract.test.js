@@ -5,8 +5,8 @@ import { join } from 'node:path';
 
 const read=p=>readFileSync(p,'utf8');
 const stripSqlComments=sql=>sql.replace(/--.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');
-const HIRES=['2305','2311','2313','2316','2317','2319'];
-const MAPPED={'SHRT-89':'2311','OUT-014':'2319','GRF-101':'2313','OUT-012':'2317','PRT-003':'2316','PRT-002':'2305'};
+const HIRES=['2305','2311','2317','2319'];
+const MAPPED={'SHRT-89':'2311','OUT-014':'2319','OUT-012':'2317','PRT-002':'2305'};
 function webpDimensionsFromFile(path){
   const js=read(path);const m=js.match(/base64,([A-Za-z0-9+/=]+)/);assert.ok(m,`embedded WebP missing in ${path}`);
   const b=Buffer.from(m[1],'base64');assert.equal(b.toString('ascii',0,4),'RIFF');assert.equal(b.toString('ascii',8,12),'WEBP');const chunk=b.toString('ascii',12,16);
@@ -26,10 +26,11 @@ test('all customer-facing verified images are high-resolution and no low-resolut
   for(const id of HIRES){const path=`media/hires/${id}.js`;assert.ok(existsSync(path),`${path} missing`);const d=webpDimensionsFromFile(path);assert.ok(d.width>=1000,`${id} width ${d.width}`);assert.ok(d.height>=1250,`${id} height ${d.height}`)}
 });
 
-test('media manifest exposes exactly six verified commerce mappings and keeps the rest editorial-only',()=>{
+test('media manifest exposes exactly four fully transported verified commerce mappings',()=>{
   const manifest=read('media-manifest.js');
   for(const [sku,id] of Object.entries(MAPPED))assert.match(manifest,new RegExp(`"${sku}"\\s*:\\s*"${id}"`));
-  assert.doesNotMatch(manifest,/"GRF-102"\s*:/);assert.doesNotMatch(manifest,/"BSC-06"\s*:/);assert.match(manifest,/editorialOrder/);assert.equal((manifest.match(/script:"\/media\/hires\//g)||[]).length,6);
+  for(const sku of ['GRF-102','BSC-06','GRF-101','PRT-003'])assert.doesNotMatch(manifest,new RegExp(`"${sku}"\\s*:`));
+  assert.match(manifest,/editorialOrder/);assert.equal((manifest.match(/script:"\/media\/hires\//g)||[]).length,4);
 });
 
 test('customer UI never falls back to low-resolution source image URLs',()=>{
