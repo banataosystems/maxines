@@ -1,0 +1,7 @@
+{
+  "source_archive": "MAXINES-Telegram-MiniApp-2026-08-10-v4.zip",
+  "source_sha256": "ca4681ccc7e3089a6bbaa0517dc01ecde4b78553a229df62b590010ef757ecd8",
+  "transformation": "Connector-compatible deployment transport: product JPEGs are replaced by source-derived WebP-in-SVG assets and runtime paths are updated accordingly. Functional application code is otherwise from the v4 artifact.",
+  "tests_before_transform": "16/16 passed on exact v4 source artifact",
+  "production_claim": "Do not treat this transport transform as byte-identical to the v4 archive; the archive remains the recovery authority."
+}
