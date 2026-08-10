@@ -1,0 +1,17 @@
+{
+  "name": "maxines-telegram-miniapp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test tests/*.test.js",
+    "verify": "npm run check && npm test",
+    "telegram:webhook": "node scripts/set-webhook.mjs",
+    "telegram:bootstrap": "node scripts/telegram-bootstrap.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
