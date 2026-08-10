@@ -31,4 +31,3 @@ if(initData){
   }catch(_error){}
 }
 await import('/shell.js');
-await import('/request-mode.js');
