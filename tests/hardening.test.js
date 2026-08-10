@@ -15,6 +15,6 @@ test('HttpOnly application session and cookie forwarding are present',()=>{const
 
 test('persistent customer and owner operations are private by default',()=>{const sql=read('supabase/migrations/20260811_000001_customer_owner_ops.sql');for(const table of ['user_favorites','staff_users','audit_events'])assert.match(sql,new RegExp(`alter table public\\.${table} enable row level security`,'i'));assert.match(sql,/revoke all on public\.staff_users from public, anon, authenticated/i);assert.match(sql,/grant execute on function public\.maxines_record_audit[\s\S]*to service_role/i);const shell=read('app-main.js');for(const endpoint of ['/api/favorites','/api/orders','/api/owner-requests'])assert.match(shell,new RegExp(endpoint.replaceAll('/','\\/')))});
 
-test('production hardening pins runtime and tightens CSP',()=>{const pkg=JSON.parse(read('package.json')),v=read('vercel.json');assert.equal(pkg.engines.node,'20.x');assert.match(v,/object-src 'none'/);assert.match(v,/manifest-src 'self'/)});
+test('production hardening pins runtime and tightens CSP',()=>{const pkg=JSON.parse(read('package.json')),v=read('vercel.json');assert.equal(pkg.engines.node,'24.x');assert.match(v,/object-src 'none'/);assert.match(v,/manifest-src 'self'/)});
 
 test('commerce remains fail-closed and request fallback non-charging',()=>{const shell=read('app-main.js');assert.match(shell,/fetch\('\/api\/checkout'/);assert.match(shell,/fetch\('\/api\/request'/);assert.match(shell,/not a confirmed order/i);assert.match(shell,/No payment was taken/i)});
