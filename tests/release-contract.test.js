@@ -13,6 +13,20 @@ test('production entry loads database/session bootstrap and Archive editorial me
   for(const file of ['bsc-06.js','shrt-89.js','out-014.js','grf-101.js'])assert.match(html,new RegExp(`/media/editorial/${file.replace('.','\\.')}`));
 });
 
+test('Archive landing editorial cannot regress to a low-resolution asset',()=>{
+  const js=read('media/editorial/shrt-89.js');
+  const match=js.match(/base64,([A-Za-z0-9+/=]+)/);
+  assert.ok(match,'expected embedded WebP editorial image');
+  const bytes=Buffer.from(match[1],'base64');
+  assert.equal(bytes.toString('ascii',0,4),'RIFF');
+  assert.equal(bytes.toString('ascii',8,12),'WEBP');
+  assert.equal(bytes.toString('ascii',12,16),'VP8 ');
+  const width=bytes.readUInt16LE(26)&0x3fff;
+  const height=bytes.readUInt16LE(28)&0x3fff;
+  assert.ok(width>=720,`editorial width ${width}px is too small`);
+  assert.ok(height>=1200,`editorial height ${height}px is too small`);
+});
+
 test('embedded recovery catalog contains exactly 13 source SKU records',()=>{
   const catalog=read('catalog-data.js');
   assert.equal((catalog.match(/"sku":/g)||[]).length,13);
