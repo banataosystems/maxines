@@ -1,6 +1,6 @@
 # MAXINES — Verified Current State
 
-Observed 2026-08-10 (Asia/Manila). This file records durable provider evidence because Pandora Memory is currently unavailable through this ChatGPT connection. It contains no credentials or customer data.
+Observed 2026-08-11 (Asia/Manila). This is the durable project-state record while Pandora Memory is unavailable through this ChatGPT connection. It contains no credentials or customer data.
 
 ## Identity and recovery
 
@@ -9,98 +9,137 @@ Observed 2026-08-10 (Asia/Manila). This file records durable provider evidence b
 - Production: `https://maxines.vercel.app`.
 - Vercel project: `prj_Lf08luz6HGMnZXMpGodt7Cfo3WVC`.
 - Supabase: `uweqyehikjliykjzgdgm` (`maxistyle`).
-- Telegram: `@maxinespain_bot`, Bot API id `8840952317`.
-- Canonical original artifact: `MAXINES-Telegram-MiniApp-2026-08-10-v4.zip`.
-- Canonical artifact SHA-256: `ca4681ccc7e3089a6bbaa0517dc01ecde4b78553a229df62b590010ef757ecd8`.
-- Exact v4 Supabase foundation is also mirrored to GitHub in `recovery/MAXINES-v4-supabase-foundation.tar.gz`.
+- Telegram: `@maxinespain_bot`.
+- Canonical original artifact SHA-256: `ca4681ccc7e3089a6bbaa0517dc01ecde4b78553a229df62b590010ef757ecd8`.
+- Supabase foundation recovery bundle SHA-256: `a1b330d3f7d793bc49e6982f19cf4e8398e72142c82a91351fd2298e44a97f28`.
 
-## Implemented
+## Current production release
 
-- Database-backed 13-SKU storefront, search, collections, product sheets, variants and cart.
-- Telegram Mini App bootstrap and Telegram `initData` HMAC/freshness validation.
-- Telegram bot `/start`, `/shop`, `/help`, Web App menu and secret-token webhook.
-- Supabase RLS commerce schema, inventory reservations, order/payment state and atomic payment settlement.
-- Same-origin Vercel APIs for catalog, health, Telegram session, checkout, order status and Telegram health.
-- Gated Telegram invoice path for physical-goods payments.
-- CSP, HSTS, nosniff, strict referrer policy, restrictive permissions policy and SAMEORIGIN framing.
-- Non-destructive commerce kill switch in `supabase/rollback/disable_checkout.sql`.
-- Active Supabase Edge sources and recovery material mirrored into GitHub without secret values.
+- Runtime Git commit: `f9f70c3ca1d3c309348b6f145099a5c59144311b`.
+- Vercel production deployment: `dpl_48HutLwzLGYbU5zei6h5TReZyLPb` — READY.
+- PR #7 merged the audit-driven production hardening.
+- PR #8 merged live staff-role revalidation and database covering indexes.
+- PR #9 was verification-only and is closed without merge.
+- GitHub Actions proof: run `31438607469` passed PR #7; run `31439182763` passed PR #8; run `31439784642` passed the isolated authenticated-session E2E proof.
+- Current Vercel production deployment has no error/fatal runtime logs in the final verification window.
 
-## Safe operational fallback
+## Customer frontend
 
-Because the connected sources contain no verified live stock, approved settlement prices/currency, shipping policy or Telegram physical-goods payment-provider token, paid checkout remains fail-closed.
+- Render-first startup: the Archive interface renders from embedded source-backed data before catalog/health/session network hydration completes.
+- Browser zoom is enabled; `user-scalable=no` was removed.
+- Root-wide `aria-live` was removed and replaced by a dedicated status live region.
+- Search now returns real clickable product results and uses a short debounce instead of rebuilding on every key synchronously.
+- Dialogs implement Escape close, focus trapping, focus-on-open and focus restoration.
+- Customer pricing shows **Price on request** while commercial activation is false; source TON labels remain provenance data and are not presented as approved sale prices.
+- Saved items persist locally for anonymous/web viewing and synchronize to the database for authenticated Telegram users.
+- Account UI exposes the authenticated user's availability-request and order history.
+- Owner availability inbox exists but is hidden unless the verified Telegram session maps to an active `staff_users` role.
+- Responsive layouts remain deliberate for compact phones, phones, landscape/foldables, tablets, desktop and wide screens.
 
-To make the production system useful without inventing those inputs, MAXINES now has an authenticated **availability-request** path:
+## Media
 
-- Shown only to verified Telegram Mini App users when paid checkout is locked and the bag is non-empty.
-- Creates an availability request only; it is explicitly **not a confirmed order**.
-- Takes **no payment** and reserves **no inventory**.
-- Telegram user receives a confirmation stating no payment was taken.
-- Duplicate identical pending requests by the same user within ten minutes are reused.
-- `availability_requests` has RLS and no direct `anon` or `authenticated` access.
-- `create_availability_request(...)` is executable only by `service_role`.
-- Same-origin routes: `POST /api/request`, `GET /api/requests`.
-- Unauthenticated `/api/requests` is production-verified to return HTTP 401 `telegram_auth_required`.
+Only fully verified high-resolution commerce associations are customer-facing:
 
-Supabase Edge function `maxines-request` version 1 is ACTIVE with provider SHA-256 `bdabda3d78a6dce2d98840b60a73f7f4599893f0ca53728aae7b20080ffc4f37`.
+- `SHRT-89` → `2311` — Botanical Contrast Collar.
+- `OUT-014` → `2319` — Heritage Plaid.
+- `OUT-012` → `2317` — Chartreuse Military Cut.
+- `PRT-002` → `2305` — Leopard Box.
 
-## Production evidence
+Customer media now resolves through same-origin `/api/media?id=...` as real `image/webp` resources rather than browser-executed base64 JavaScript. The production 2311 media endpoint is HTTP 200 with WebP content and public caching. Other editorial candidates remain preserved but unlinked until their SKU association is verified.
 
-Verified runtime code candidate:
+## Authentication and customer sessions
 
-- Git runtime/test commit: `cc4d16a52d7a4f68a1848d3163268287b45fdc4a`.
-- Matching production deployment: `dpl_BvqGqDCUyEMy5NULnzZyVQ3swYYL`, READY.
-- Verification PR #1 used that exact production base plus this documentation-only state record.
-- PR verification head: `9a5acc6758f816811c8b90b9835c4822d793c6b5`.
-- GitHub Actions `Verify MAXINES` run `31405579570`: **completed / success**; `npm run verify` passed.
-- PR #1 was squash-merged to `main` as `0376ddc3cfaaf012ae83f93da48a86b83dc4e9a7`.
-- Matching merged production deployment: `dpl_3pFkXNGnEtMVwAfJAPoVicXdyCEH`, READY; GitHub commit verification reported `verified`.
-- `/api/health`: HTTP 200.
-- Health state: database connected; 13 products; Telegram configured; webhook secret configured; paid checkout disabled.
-- Paid-commerce gates: payment provider false; release authorization false; settlement currency unset; shipping unset; verified inventory false; `checkoutActivated=false`.
-- Database verification after fallback: 0 availability requests, 0 orders, 0 payments.
-- Availability-request RLS: enabled.
-- Direct availability table SELECT for `anon` and `authenticated`: false.
-- Availability creation RPC execute for `anon`/`authenticated`: false; for `service_role`: true.
-- Supabase security advisor: no WARN/ERROR findings; remaining RLS-without-policy entries are intentional INFO deny-by-default boundaries.
-- Vercel runtime error check over the final verification window: no runtime error clusters.
+- Telegram `initData` HMAC/freshness validation remains server-side.
+- Successful Telegram bootstrap creates a signed short-lived MAXINES application session.
+- Vercel stores the token as `mx_session` with `HttpOnly`, `Secure`, `SameSite=Lax`, 30-minute TTL.
+- Normal customer APIs forward the session server-to-server as `x-maxines-session`; the token is not returned to browser JSON.
+- Production E2E proof run `31439784642` used a fixed synthetic Telegram identity and verified:
+  - session bootstrap HTTP 200;
+  - `HttpOnly=true`, `Secure=true`;
+  - browser response did not expose `sessionToken`;
+  - session GET 200;
+  - favorites 200;
+  - orders 200;
+  - availability requests 200;
+  - owner inbox 403 for a non-staff identity;
+  - authenticated checkout 503 `payment_provider_not_configured`;
+  - synthetic audit/favorite cleanup succeeded.
+- The one-time Supabase verifier has been replaced by an inert HTTP 410 implementation.
 
-## CI repair and proof
+## Private customer / owner data foundation
 
-GitHub Actions verification had been red because a rollback safety test matched the word `delete` inside a harmless SQL comment (`does not delete ...`). The test was corrected to strip SQL comments before scanning executable statements for `DELETE`, `DROP` or `TRUNCATE`.
+Applied and mirrored migrations:
 
-The independent pull-request run then passed every workflow step, including `npm run verify`, before merge. CI is therefore green for the verified production code candidate.
+- `20260811_000001_customer_owner_ops.sql`
+  - `user_favorites`
+  - `staff_users`
+  - `audit_events`
+  - RLS enabled, direct public/anon/authenticated access revoked.
+  - `maxines_record_audit(...)` is service-role-only.
+- `20260811_000002_performance_covering_indexes.sql`
+  - covering indexes for `order_items.order_id`, `order_items.product_id`, `order_items.variant_id`, and `user_favorites.sku`.
 
-## Applied Supabase migrations
+The Supabase performance advisor no longer reports unindexed-foreign-key warnings for those relationships. Remaining index notices are INFO unused-index observations on a low/no-traffic system. Security advisor has no WARN/ERROR findings; RLS-without-policy notices are intentional deny-by-default INFO boundaries.
 
-1. `20260810143847` — `maxines_commerce_foundation`
-2. `20260810144157` — `harden_touch_updated_at_search_path`
-3. `20260810144240` — `telegram_vault_bridge`
-4. `20260810144300` — `backend_capabilities_probe`
-5. `20260810145140` — `telegram_webhook_secret_bridge`
-6. `20260810145217` — `enable_sync_http_for_telegram_control` (temporary)
-7. `20260810145247` — `telegram_bot_bootstrap_control` (temporary)
-8. `20260810145348` — `telegram_bootstrap_state`
-9. `20260810145720` — `retire_telegram_bootstrap_transports`
-10. `20260810145832` — `commerce_activation_gates`
-11. `20260810153952` — `availability_request_fallback`
+## Owner operations
+
+- Staff roles are stored in `staff_users` with `owner`, `admin`, or `staff` role and active flag.
+- Every privileged owner-inbox request re-queries the current active staff row instead of relying only on the role cached in the 30-minute session.
+- Availability-request status changes are audited.
+- New customer availability requests can notify active staff Telegram accounts.
+- **Current `staff_users` count is 0.** No owner/staff identity is activated because no authoritative Telegram numeric user ID has been supplied. Do not guess one.
+
+## Commerce / safety state
+
+Current database proof after all synthetic cleanup:
+
+- Canonical products: 13.
+- Checkout-enabled products: 0.
+- In-stock enabled variants: 0.
+- Orders: 0.
+- Payments: 0.
+- Availability requests: 0.
+- Favorites: 0.
+- Audit events: 0.
+- Staff users: 0.
+- Checkout release authorization: false.
+- `/api/health`: HTTP 200 with `checkoutActivated=false` and `mode=full_backend_fail_closed`.
+
+Paid commerce therefore remains intentionally impossible. No stock, merchant settlement price/currency, shipping amount, provider token, or release authorization was fabricated.
+
+## Active Edge functions
+
+- `maxines-api` v5 — ACTIVE. Signed application sessions, favorites, customer orders, owner inbox, live staff revalidation, audit events, gated checkout.
+- `maxines-request` v2 — ACTIVE. Signed-session reuse, customer confirmation, staff notification, request audit.
+- `maxines-e2e-test` v2 — ACTIVE but intentionally inert; always HTTP 410.
+
+## Build / security hardening
+
+- Node runtime pinned to `24.x`, matching Vercel's current supported project runtime.
+- CSP now includes `object-src 'none'` and `manifest-src 'self'` in addition to the existing self-only/default restrictions.
+- HSTS, `nosniff`, restrictive Permissions Policy, strict referrer policy and SAMEORIGIN framing remain live.
+- Current production build completes cleanly without the Node 20 deprecation blocker.
+
+## Analytics
+
+First-party `audit_events` infrastructure is implemented. Connected PostHog could not be configured or verified because the connector currently returns `400: We couldn't connect your account. Please try again.` Do not claim PostHog is active for MAXINES until the connection works and event ingestion is verified.
+
+## Remaining external / evidence gates
+
+1. Verified real sizes and stock quantities.
+2. Owner-approved settlement currency and per-SKU payment prices.
+3. Owner-approved shipping policy/amount.
+4. Telegram-compatible physical-goods payment-provider token.
+5. Explicit commerce release authorization after real payment testing.
+6. Authoritative Telegram numeric ID for the owner/staff account before enabling the owner console.
+7. Reconciliation of remaining editorial candidates to the remaining catalog SKUs.
+8. Real physical-device visual/performance verification can still improve evidence beyond the responsive source/CI contract.
+9. Connected PostHog must reconnect before external product analytics/session replay can be claimed.
 
 ## Current phase
 
-**Production storefront, database, Telegram control plane, full gated commerce backend, CI verification and non-charging authenticated availability-request workflow are deployed and verified. Paid commerce remains intentionally fail-closed until genuine merchant inputs exist.**
-
-## Genuine external inputs still absent
-
-Searches of the MAXINES Supabase Vault, project/library artifacts, connected Gmail and connected Google Drive found no authoritative values for:
-
-1. Verified real product sizes and stock quantities.
-2. Owner-approved settlement currency and per-SKU provider prices.
-3. Owner-approved shipping policy/amount.
-4. Telegram-compatible physical-goods payment-provider token.
-5. Real human-phone Mini App/payment proof.
-
-These values must not be fabricated. The source `TON` labels are display data and are not silently converted into settlement prices.
+**Hardened premium storefront, Telegram control plane, signed customer session, persistent authenticated favorites/account history, latent staff owner inbox, first-party audit foundation, transactional commerce backend, CI and production E2E session proof are implemented and deployed. Real-money commerce remains correctly fail-closed pending genuine merchant inputs and release authorization.**
 
 ## Release rule
 
-Keep real-money checkout closed. When genuine merchant inputs are supplied through an authoritative source, load and validate them first with release authorization still false; then run real Telegram/mobile/payment verification; only after that separately authorize paid commerce.
+Do not enable paid checkout from display labels or guessed merchant data. Load genuine merchant inputs with release authorization still false, validate them, perform real Telegram/payment proof, then separately authorize production commerce.
