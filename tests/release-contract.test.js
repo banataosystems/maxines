@@ -4,6 +4,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const read=p=>readFileSync(p,'utf8');
+const stripSqlComments=sql=>sql.replace(/--.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');
 
 test('production entry loads database/session bootstrap',()=>{
   const html=read('index.html');
@@ -34,8 +35,9 @@ test('bootstrap hydrates live catalog, health and Telegram session',()=>{
 
 test('rollback is non-destructive and closes release gate',()=>{
   const sql=read('supabase/rollback/disable_checkout.sql');
-  assert.match(sql,/checkout_release_authorized\s*=\s*false/i);
-  assert.doesNotMatch(sql,/\bdelete\b|\bdrop\b|\btruncate\b/i);
+  const executable=stripSqlComments(sql);
+  assert.match(executable,/checkout_release_authorized\s*=\s*false/i);
+  assert.doesNotMatch(executable,/\b(?:delete|drop|truncate)\b/i);
 });
 
 test('security headers are declared',()=>{
