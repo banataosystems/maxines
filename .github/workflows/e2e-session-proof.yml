@@ -1,0 +1,19 @@
+name: MAXINES Session E2E Proof
+on:
+  push:
+    branches:
+      - test/e2e-session-cookie
+jobs:
+  verify-session-cookie:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke one-time verifier
+        run: |
+          curl --fail --silent --show-error 'https://uweqyehikjliykjzgdgm.supabase.co/functions/v1/maxines-e2e-test?nonce=H4oqSisfkb_9PsEH-SFpkGo1mlEQcrlm5d-cTLHJb9c' -o result.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('result.json','utf8'));
+          const safe={ok:r.ok,setCookieHttpOnly:r.setCookieHttpOnly,setCookieSecure:r.setCookieSecure,sessionBootstrap:r.sessionBootstrap,bootstrapLeaksSessionToken:r.bootstrapLeaksSessionToken,sessionGet:r.sessionGet,favorites:r.favorites,orders:r.orders,requests:r.requests,owner:r.owner,checkout:r.checkout,checkoutError:r.checkoutError,cleanup:r.cleanup};
+          console.log(JSON.stringify(safe,null,2));
+          if(!r.ok||!r.setCookieHttpOnly||!r.setCookieSecure||r.bootstrapLeaksSessionToken||!r.cleanup)process.exit(1);
+          NODE
