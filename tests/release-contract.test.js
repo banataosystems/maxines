@@ -6,10 +6,11 @@ import { join } from 'node:path';
 const read=p=>readFileSync(p,'utf8');
 const stripSqlComments=sql=>sql.replace(/--.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');
 
-test('production entry loads database/session bootstrap',()=>{
+test('production entry loads database/session bootstrap and Archive editorial media',()=>{
   const html=read('index.html');
   assert.match(html,/\/backend-init\.js/);
   assert.match(html,/telegram-web-app\.js/);
+  for(const file of ['bsc-06.js','shrt-89.js','out-014.js','grf-101.js'])assert.match(html,new RegExp(`/media/editorial/${file.replace('.','\\.')}`));
 });
 
 test('embedded recovery catalog contains exactly 13 source SKU records',()=>{
@@ -18,11 +19,28 @@ test('embedded recovery catalog contains exactly 13 source SKU records',()=>{
   assert.match(catalog,/checkoutEnabled":false/);
 });
 
-test('client commerce remains server-gated and uses Telegram invoices',()=>{
+test('Archive shell keeps editorial and untouched original media as separate trust layers',()=>{
+  const shell=read('shell.js');
+  assert.match(shell,/__ARCHIVE_EDITORIAL__/);
+  assert.match(shell,/Editorial/);
+  assert.match(shell,/Original Photo/);
+  assert.match(shell,/source display label/i);
+  assert.match(shell,/not treated as an approved settlement price/i);
+});
+
+test('client commerce remains server-gated and uses Telegram invoices only when activated',()=>{
   const shell=read('shell.js');
   assert.match(shell,/H\.checkoutActivated/);
   assert.match(shell,/fetch\('\/api\/checkout'/);
   assert.match(shell,/openInvoice/);
+});
+
+test('Archive locked-commerce drawer submits authenticated non-charging availability requests',()=>{
+  const shell=read('shell.js');
+  assert.match(shell,/fetch\('\/api\/request'/);
+  assert.match(shell,/x-telegram-init-data/);
+  assert.match(shell,/not a confirmed order/i);
+  assert.match(shell,/no payment/i);
 });
 
 test('bootstrap hydrates live catalog, health and Telegram session',()=>{
