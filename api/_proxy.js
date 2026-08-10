@@ -14,7 +14,9 @@ export async function proxy(req,res,route,methods=['GET']){
       headers['content-type']='application/json';
       init.body=JSON.stringify(req.body??{});
     }
-    const upstream=await fetch(`${EDGE_BASE}/${route}`,init);
+    const rawUrl=String(req.url||'');
+    const query=rawUrl.includes('?')?rawUrl.slice(rawUrl.indexOf('?')):'';
+    const upstream=await fetch(`${EDGE_BASE}/${route}${query}`,init);
     const text=await upstream.text();
     res.setHeader('Cache-Control','no-store');
     res.setHeader('X-Content-Type-Options','nosniff');
