@@ -1,12 +1,11 @@
 const ALLOWED=new Set(['2305','2311','2317','2319']);
+const SOURCE_BASE='https://maxines.vercel.app/media/hires';
 export default async function handler(req,res){
   if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({ok:false,error:'method_not_allowed'})}
   const id=String(req.query?.id||'');
   if(!ALLOWED.has(id))return res.status(404).json({ok:false,error:'media_not_found'});
   try{
-    const proto=String(req.headers['x-forwarded-proto']||'https').split(',')[0].trim();
-    const host=String(req.headers.host||'maxines.vercel.app');
-    const upstream=await fetch(`${proto}://${host}/media/hires/${id}.js`,{headers:{accept:'application/javascript'}});
+    const upstream=await fetch(`${SOURCE_BASE}/${id}.js`,{headers:{accept:'application/javascript'}});
     if(!upstream.ok)throw new Error(`source_${upstream.status}`);
     const js=await upstream.text();
     const m=js.match(/base64,([A-Za-z0-9+/=]+)/);
